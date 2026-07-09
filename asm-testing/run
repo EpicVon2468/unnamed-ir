@@ -1,0 +1,10 @@
+#! /usr/bin/bash
+
+if ! ./build "$1"; then
+	exit "$?"
+fi
+
+./"$1"
+
+status=$?
+exit "$status"

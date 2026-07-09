@@ -1,0 +1,50 @@
+#! /usr/bin/bash
+
+file_name="$1"
+
+stdout() {
+	if [ -n "$1" ]; then
+		echo "$1"
+	fi
+}
+
+rm -rf "$file_name.o"
+rm -rf "$file_name"
+
+rm -rf ./lib/lib.o
+
+echo -n "Compiling './lib/lib.o'... "
+
+if output=$(nasm -f elf64 ./lib/*.S -o ./lib/lib.o 2>&1); then
+	echo "OK"
+	stdout "$output"
+else
+	status="$?"
+	echo "ERR"
+	stdout "$output"
+	exit "$status"
+fi
+
+echo -n "Compiling '$file_name.S'... "
+
+if output=$(nasm -f elf64 "$file_name.S" -o "$file_name.o" 2>&1); then
+	echo "OK"
+	stdout "$output"
+
+	echo -n "Linking '$file_name.o'... "
+
+	if output=$(ld "$file_name.o" "./lib/lib.o" -o "$file_name" 2>&1); then
+		echo "OK"
+		stdout "$output"
+
+		chmod +x "$file_name"
+	else
+		echo "ERR"
+		stdout "$output"
+	fi
+else
+	echo "ERR"
+	stdout "$output"
+fi
+
+rm -rf "$file_name.o"

@@ -55,4 +55,20 @@
 )]
 #![allow(clippy::borrowed_box)]
 #![doc = include_str!("../README.md")]
-pub fn foo() {}
+
+use std::arch::asm;
+
+pub fn main() {
+	let x: u64;
+	let y: u64;
+	// SAFETY:
+	unsafe {
+		asm!("mov {}, 5", out(reg) x);
+	};
+	dbg!(x);
+	// SAFETY:
+	unsafe {
+		asm!("add {}, 10", inout(reg) x => y);
+	};
+	dbg!((x, y));
+}
