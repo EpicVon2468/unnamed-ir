@@ -9,21 +9,25 @@ stdout() {
 }
 
 rm -rf "$file_name.o"
-rm -rf "$file_name"
+rm -rf "$file_name.elf"
 
-rm -rf ./lib/lib.o
+rm -rf lib/*.o
 
-echo -n "Compiling './lib/lib.o'... "
+for file in lib/*.S; do
+	file="$(basename "$PWD/lib/$file" .S)"
 
-if output=$(nasm -f elf64 ./lib/*.S -o ./lib/lib.o 2>&1); then
-	echo "OK"
-	stdout "$output"
-else
-	status="$?"
-	echo "ERR"
-	stdout "$output"
-	exit "$status"
-fi
+	echo -n "Compiling 'lib/$file.S'... "
+
+	if output=$(nasm -f elf64 "lib/$file.S" -o "lib/$file.o" 2>&1); then
+		echo "OK"
+		stdout "$output"
+	else
+		status="$?"
+		echo "ERR"
+		stdout "$output"
+		exit "$status"
+	fi
+done
 
 echo -n "Compiling '$file_name.S'... "
 
@@ -33,11 +37,11 @@ if output=$(nasm -f elf64 "$file_name.S" -o "$file_name.o" 2>&1); then
 
 	echo -n "Linking '$file_name.o'... "
 
-	if output=$(ld "$file_name.o" "./lib/lib.o" -o "$file_name" 2>&1); then
+	if output=$(ld "$file_name.o" ./lib/*.o -o "$file_name.elf" 2>&1); then
 		echo "OK"
 		stdout "$output"
 
-		chmod +x "$file_name"
+		chmod +x "$file_name.elf"
 	else
 		echo "ERR"
 		stdout "$output"

@@ -4,7 +4,7 @@ if ! ./build "$1"; then
 	exit "$?"
 fi
 
-./"$1"
+./"$1.elf"
 
 status=$?
 exit "$status"
